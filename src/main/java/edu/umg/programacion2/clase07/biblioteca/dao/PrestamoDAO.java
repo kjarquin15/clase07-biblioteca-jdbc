@@ -26,7 +26,7 @@ public class PrestamoDAO {
 
     private static final String URL = "jdbc:mysql://localhost:3306/prog2_db?useSSL=false&serverTimezone=UTC";
     private static final String USUARIO = "root";
-    private static final String PASSWORD = "tu_password_aqui";
+    private static final String PASSWORD = "";
 
     // Repaso: INSERT con generated keys, igual que EstudianteDAO.crear().
     public int registrarPrestamo(Prestamo prestamo) throws SQLException {
@@ -96,8 +96,35 @@ public class PrestamoDAO {
      * 4. Agregalo a una List<PrestamoDetalle> y devuelvela al final.
      */
     public List<PrestamoDetalle> listarPrestamosActivosConLibro() throws SQLException {
+
         List<PrestamoDetalle> resultado = new ArrayList<>();
-        // TODO: ejecutar la consulta con JOIN descrita arriba y llenar "resultado".
+
+        String sql = "SELECT p.nombre_estudiante, p.fecha_prestamo, l.titulo "
+                + "FROM prestamos p "
+                + "JOIN libros l ON p.libro_id = l.id "
+                + "WHERE p.fecha_devolucion IS NULL "
+                + "ORDER BY p.fecha_prestamo";
+
+        try (Connection conexion = DriverManager.getConnection(URL, USUARIO, PASSWORD);
+             PreparedStatement statement = conexion.prepareStatement(sql);
+             ResultSet rs = statement.executeQuery()) {
+
+            while (rs.next()) {
+
+                String titulo = rs.getString("titulo");
+                String nombreEstudiante = rs.getString("nombre_estudiante");
+                LocalDate fechaPrestamo =
+                        rs.getDate("fecha_prestamo").toLocalDate();
+
+                PrestamoDetalle detalle = new PrestamoDetalle(
+                        titulo,
+                        nombreEstudiante,
+                        fechaPrestamo
+                );
+
+                resultado.add(detalle);
+            }
+        }
 
         return resultado;
     }
