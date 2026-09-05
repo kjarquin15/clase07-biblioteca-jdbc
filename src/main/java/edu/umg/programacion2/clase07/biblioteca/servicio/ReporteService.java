@@ -1,6 +1,7 @@
 package edu.umg.programacion2.clase07.biblioteca.servicio;
 
 import edu.umg.programacion2.clase07.biblioteca.dao.LibroDAO;
+
 import edu.umg.programacion2.clase07.biblioteca.dao.PrestamoDAO;
 import edu.umg.programacion2.clase07.biblioteca.modelo.Libro;
 import edu.umg.programacion2.clase07.biblioteca.modelo.PrestamoDetalle;
@@ -55,7 +56,23 @@ public class ReporteService {
      */
     public Set<Libro> librosNuncaPrestados() throws SQLException {
         Set<Libro> resultado = new HashSet<>();
-        // TODO: usar libroDAO y prestamoDAO para llenar "resultado" segun las pistas de arriba.
+
+        List<Libro> libros = libroDAO.listarTodos();
+
+        List<PrestamoDetalle> activos =
+                prestamoDAO.listarPrestamosActivosConLibro();
+
+        Set<String> titulosConPrestamoActivo = new HashSet<>();
+
+        for (PrestamoDetalle prestamo : activos) {
+            titulosConPrestamoActivo.add(prestamo.getTituloLibro());
+        }
+
+        for (Libro libro : libros) {
+            if (!titulosConPrestamoActivo.contains(libro.getTitulo())) {
+                resultado.add(libro);
+            }
+        }
 
         return resultado;
     }
@@ -74,7 +91,16 @@ public class ReporteService {
     public Map<String, Integer> contarPrestamosActivosPorTitulo() throws SQLException {
         Map<String, Integer> conteo = new HashMap<>();
         List<PrestamoDetalle> activos = prestamoDAO.listarPrestamosActivosConLibro();
-        // TODO: recorrer "activos" y llenar "conteo" usando getTituloLibro() como llave.
+     
+            for (PrestamoDetalle prestamo : activos) {
+                String titulo = prestamo.getTituloLibro();
+
+                if (conteo.containsKey(titulo)) {
+                    conteo.put(titulo, conteo.get(titulo) + 1);
+                } else {
+                    conteo.put(titulo, 1);
+                }
+            }
 
         return conteo;
     }
